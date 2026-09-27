@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Verifications — SurplusRoute admin</title>
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="masthead" data-header></header>
+
+<main id="main" class="shell page">
+
+  <h1 class="tight">Verifications</h1>
+  <p class="meta" style="margin-bottom:1.5rem">Approve or reject, then the documents are gone.</p>
+
+  <div class="notice notice-warn" style="margin-bottom:2rem">
+    <p class="tight">Deciding deletes the uploaded identity document straight away. Only the outcome,
+    the emirate and the date are kept.</p>
+  </div>
+
+  <section class="panel" style="margin-bottom:2rem">
+    <div class="panel-head">
+      <h2 style="font-size:1.3125rem">Waiting for review</h2>
+      <span class="meta push" id="count"></span>
+    </div>
+    <div class="panel-body">
+      <div class="stack" id="queue"></div>
+      <div class="empty" id="empty" hidden>
+        <h3>Queue is clear</h3>
+        <p class="muted tight">Nothing waiting. New registrations appear here as they arrive.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head"><h2 style="font-size:1.3125rem">Decided</h2></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Reference</th><th>Emirate</th><th>Submitted</th><th>Outcome</th><th>Document</th></tr></thead>
+        <tbody id="decided"></tbody>
+      </table>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer" data-footer></footer>
+<script src="assets/app.js"></script>
+<script>
+const user = requireRole('admin');
+
+function decisions() { return Store.get('decisions', {}); }
+
+function render() {
+  const made = decisions();
+  const waiting = SEED_VERIFICATIONS.filter(v => v.status === 'pending' && !made[v.id]);
+
+  document.getElementById('count').textContent = waiting.length + ' waiting';
+  document.getElementById('empty').hidden = waiting.length > 0;
+
+  document.getElementById('queue').innerHTML = waiting.map(v => `
+    <div class="card card-tight" data-row="${v.id}">
+      <div class="row row-between" style="margin-bottom:.75rem">
+        <div>
+          <h3 class="tight" style="font-size:1.0625rem">${v.name}</h3>
+          <p class="meta tight">${v.id} · ${v.emirate} · submitted ${v.submitted}</p>
+        </div>
+        <span class="badge badge-quiet push">${v.docs}</span>
+      </div>
+      <div class="row">
+        <button class="btn btn-primary btn-sm" type="button" data-approve="${v.id}">Approve</button>
+        <button class="btn btn-danger btn-sm" type="button" data-reject="${v.id}">Reject</button>
+        <span class="meta push">Income band declared: under AED 3,000</span>
+      </div>
+    </div>`).join('');
+
+  const done = SEED_VERIFICATIONS
+    .filter(v => v.status === 'approved' || made[v.id])
+    .map(v => {
+      const outcome = made[v.id] || 'approved';
+      return `<tr>
+        <td><b>${v.id}</b></td>
+        <td class="meta">${v.emirate}</td>
+        <td class="meta">${v.submitted}</td>
+        <td><span class="badge ${outcome === 'approved' ? 'badge-discount' : 'badge-quiet'}">
+          ${outcome === 'approved' ? 'Approved' : 'Rejected'}</span></td>
+        <td class="meta">Deleted</td>
+      </tr>`;
+    }).join('');
+
+  document.getElementById('decided').innerHTML = done;
+
+  document.querySelectorAll('[data-approve]').forEach(b =>
+    b.addEventListener('click', () => decide(b.dataset.approve, 'approved')));
+  document.querySelectorAll('[data-reject]').forEach(b =>
+    b.addEventListener('click', () => decide(b.dataset.reject, 'rejected')));
+}
+
+function decide(id, outcome) {
+  const made = decisions();
+  made[id] = outcome;
+  Store.set('decisions', made);
+  render();
+}
+
+render();
+</script>
+</body>
+</html>

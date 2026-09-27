@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sign in — SurplusRoute</title>
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="masthead" data-header></header>
+
+<main id="main" class="shell page">
+  <div class="auth-shell">
+    <h1>Sign in</h1>
+    <p class="muted">Pick one of the demo accounts below, or type the details yourself.</p>
+
+    <form class="card" id="loginForm" novalidate>
+      <div class="field">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" autocomplete="username" required>
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" autocomplete="current-password" required>
+      </div>
+      <p class="notice notice-warn" id="loginError" hidden>
+        Those details do not match a demo account. Use one of the three below.
+      </p>
+      <button class="btn btn-primary btn-block" type="submit">Sign in</button>
+    </form>
+
+    <hr class="divider">
+
+    <h2 style="font-size:1.0625rem">Demo accounts</h2>
+    <p class="meta">Password for all three is <b>demo1234</b>. Select one to fill the form.</p>
+
+    <div class="stack" style="margin-top:1rem">
+      <button class="card card-tight" type="button" data-fill="sunil@bakery.ae"
+              style="text-align:left;cursor:pointer;width:100%;font:inherit">
+        <strong style="font-family:var(--serif);font-size:1.0625rem;color:var(--forest)">Bakery owner</strong>
+        <div class="meta">sunil@bakery.ae · lists surplus, sees collection codes</div>
+      </button>
+      <button class="card card-tight" type="button" data-fill="maria@worker.ae"
+              style="text-align:left;cursor:pointer;width:100%;font:inherit">
+        <strong style="font-family:var(--serif);font-size:1.0625rem;color:var(--forest)">Verified resident</strong>
+        <div class="meta">maria@worker.ae · browses and claims food nearby</div>
+      </button>
+      <button class="card card-tight" type="button" data-fill="admin@surplusroute.ae"
+              style="text-align:left;cursor:pointer;width:100%;font:inherit">
+        <strong style="font-family:var(--serif);font-size:1.0625rem;color:var(--forest)">Administrator</strong>
+        <div class="meta">admin@surplusroute.ae · approves registrations</div>
+      </button>
+    </div>
+
+    <p class="meta" style="margin-top:1.5rem">No account yet? <a href="signup.html">Create one</a>.</p>
+  </div>
+</main>
+
+<footer class="footer" data-footer></footer>
+<script src="assets/app.js"></script>
+<script>
+const HOME = { outlet: 'outlet-dashboard.html', user: 'user-browse.html', admin: 'admin-dashboard.html' };
+
+document.querySelectorAll('[data-fill]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.getElementById('email').value = btn.dataset.fill;
+    document.getElementById('password').value = 'demo1234';
+    document.getElementById('loginError').hidden = true;
+    document.getElementById('email').focus();
+  });
+});
+
+document.getElementById('loginForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const email = document.getElementById('email').value.trim().toLowerCase();
+  const pass = document.getElementById('password').value;
+  const match = DEMO_ACCOUNTS.find(a => a.email === email && a.password === pass);
+
+  if (!match) {
+    document.getElementById('loginError').hidden = false;
+    return;
+  }
+  Store.set('session', { email: match.email, role: match.role, name: match.name, org: match.org });
+  window.location.href = HOME[match.role];
+});
+</script>
+</body>
+</html>

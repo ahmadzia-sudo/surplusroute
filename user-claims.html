@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My collections — SurplusRoute</title>
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="masthead" data-header></header>
+
+<main id="main" class="shell page">
+
+  <h1 class="tight">My collections</h1>
+  <p class="meta" style="margin-bottom:1.5rem">Everything you have claimed, and what it saved you.</p>
+
+  <div class="stat-row" style="margin-bottom:2rem">
+    <div class="stat"><b id="sTotal">12</b><span>Collections this month</span></div>
+    <div class="stat"><b>AED 186</b><span>Saved against normal prices</span></div>
+    <div class="stat"><b>9.4 kg</b><span>Food kept out of waste</span></div>
+    <div class="stat"><b>Good</b><span>Collection record</span></div>
+  </div>
+
+  <section class="panel" id="activePanel" hidden style="margin-bottom:2rem">
+    <div class="panel-head">
+      <h2 style="font-size:1.3125rem">Waiting for collection</h2>
+      <span class="badge badge-live push">Timer running</span>
+    </div>
+    <div class="panel-body">
+      <div class="row row-between">
+        <div>
+          <h3 class="tight" id="aItem">Mixed pastry box</h3>
+          <p class="meta tight" id="aOutlet">Al Barsha Bakery House</p>
+        </div>
+        <a class="btn btn-primary push" href="user-claim.html">Show my code</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head"><h2 style="font-size:1.3125rem">Earlier</h2></div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Item</th><th>Where</th><th>Date</th><th>Paid</th><th>Status</th></tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer" data-footer></footer>
+<script src="assets/app.js"></script>
+<script>
+const user = requireRole('user');
+const active = Store.get('activeClaim', null);
+
+if (active && active.expires > Date.now()) {
+  document.getElementById('activePanel').hidden = false;
+  document.getElementById('aItem').textContent = active.item;
+  document.getElementById('aOutlet').textContent = active.outlet;
+}
+
+document.getElementById('rows').innerHTML = SEED_CLAIMS.map(c => `
+  <tr>
+    <td><b>${c.item}</b></td>
+    <td class="meta">${c.outlet}</td>
+    <td class="meta">${c.when}</td>
+    <td>${c.paid}</td>
+    <td><span class="badge ${c.status === 'Collected' ? 'badge-discount' : 'badge-quiet'}">${c.status}</span></td>
+  </tr>`).join('');
+</script>
+</body>
+</html>

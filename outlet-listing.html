@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Listing detail — SurplusRoute</title>
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="masthead" data-header></header>
+
+<main id="main" class="shell page">
+  <p class="eyebrow"><a href="outlet-dashboard.html">Back to listings</a></p>
+
+  <div class="notice" id="published" hidden>
+    <p class="tight"><b>Published.</b> It is now visible to verified residents nearby.</p>
+  </div>
+
+  <div class="row row-between" style="margin:1.5rem 0">
+    <div>
+      <h1 class="tight" id="title">Mixed pastry box</h1>
+      <p class="meta" id="sub">Listing L-2481</p>
+    </div>
+    <a class="btn btn-danger push" href="outlet-dashboard.html">Remove listing</a>
+  </div>
+
+  <div class="grid grid-2" style="margin-bottom:2rem">
+    <div class="card">
+      <p class="eyebrow">Listing</p>
+      <div class="stack">
+        <div class="row row-between"><span class="muted">Portions</span><b id="fPortions">6</b></div>
+        <div class="row row-between"><span class="muted">Claimed</span><b id="fClaimed">2</b></div>
+        <div class="row row-between"><span class="muted">Type</span><span id="fType"></span></div>
+        <div class="row row-between"><span class="muted">Collector pays</span><b id="fPrice">AED 12</b></div>
+        <div class="row row-between"><span class="muted">Collect by</span><b id="fCloses">22:30</b></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <p class="eyebrow">What your staff do</p>
+      <p class="muted">Somebody comes to the counter and says four characters. Find the code in the list
+      below, hand over the food, tap collected. That is the whole process.</p>
+      <p class="muted tight">If a code is not on the list, it is not a valid claim.</p>
+    </div>
+  </div>
+
+  <section class="panel">
+    <div class="panel-head">
+      <h2 style="font-size:1.3125rem">Collection codes</h2>
+      <span class="meta push">Codes expire when the window closes</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Code</th><th>Claimed at</th><th>Status</th><th></th></tr>
+        </thead>
+        <tbody id="codes"></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<footer class="footer" data-footer></footer>
+<script src="assets/app.js"></script>
+<script>
+const user = requireRole('outlet');
+const params = new URLSearchParams(location.search);
+const listing = findListing(params.get('id')) || listings()[0];
+
+if (params.get('new')) document.getElementById('published').hidden = false;
+
+if (listing) {
+  document.getElementById('title').textContent = listing.item;
+  document.getElementById('sub').textContent = 'Listing ' + listing.id + ' · ' + listing.outlet;
+  document.getElementById('fPortions').textContent = listing.portions;
+  document.getElementById('fClaimed').textContent = listing.claimed;
+  document.getElementById('fType').innerHTML = listing.type === 'free'
+    ? '<span class="badge badge-free">Donated</span>'
+    : '<span class="badge badge-discount">' + listing.discount + '% off</span>';
+  document.getElementById('fPrice').textContent = listing.type === 'free' ? 'Free' : money(listing.now);
+  document.getElementById('fCloses').textContent = listing.closes;
+
+  const times = ['21:04', '21:18', '21:26', '21:41', '21:52', '22:03'];
+  const rows = [];
+  for (let i = 0; i < listing.claimed; i++) {
+    rows.push(`<tr>
+      <td class="code-cell">${makeCode()}</td>
+      <td class="meta">${times[i % times.length]}</td>
+      <td><span class="badge badge-quiet">Waiting</span></td>
+      <td><button class="btn btn-secondary btn-sm" type="button" data-collect>Mark collected</button></td>
+    </tr>`);
+  }
+
+  document.getElementById('codes').innerHTML = rows.length ? rows.join('') :
+    `<tr><td colspan="4"><div class="empty">
+      <p class="tight muted">Nothing claimed yet. Codes appear here the moment someone claims a portion.</p>
+    </div></td></tr>`;
+
+  document.querySelectorAll('[data-collect]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const row = btn.closest('tr');
+      row.querySelector('.badge').outerHTML = '<span class="badge badge-free">Collected</span>';
+      btn.replaceWith(Object.assign(document.createElement('span'), { className: 'meta', textContent: 'Done' }));
+    });
+  });
+}
+</script>
+</body>
+</html>

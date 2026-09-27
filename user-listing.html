@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Listing — SurplusRoute</title>
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="masthead" data-header></header>
+
+<main id="main" class="shell page">
+  <p class="eyebrow"><a href="user-browse.html">Back to available food</a></p>
+
+  <div class="split" style="align-items:start">
+    <div>
+      <span class="badge" id="tag">Free</span>
+      <h1 style="margin-top:.75rem" id="title">Mixed pastry box</h1>
+      <p class="lede" id="outlet">Al Barsha Bakery House</p>
+
+      <div class="card" style="margin-top:1.5rem">
+        <div class="stack">
+          <div class="row row-between"><span class="muted">You pay</span><span class="price" id="price">Free</span></div>
+          <hr class="divider" style="margin:0">
+          <div class="row row-between"><span class="muted">Portions left</span><b id="left">4</b></div>
+          <div class="row row-between"><span class="muted">Collect by</span><b id="closes">22:30</b></div>
+          <div class="row row-between"><span class="muted">Distance</span><b id="dist">0.7 km</b></div>
+          <div class="row row-between"><span class="muted">Where</span><b id="area">Al Barsha 1</b></div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <h3>When you claim this</h3>
+        <ol class="stack" style="padding-left:1.1rem;margin:0 0 1.5rem">
+          <li class="muted">You get a four-character code and 45 minutes to arrive.</li>
+          <li class="muted">Walk in and say the code at the counter.</li>
+          <li class="muted">Take the food and go. Nothing else is asked.</li>
+        </ol>
+        <button class="btn btn-primary btn-block btn-lg" id="claimBtn" type="button">Claim a portion</button>
+        <p class="meta" style="text-align:center;margin:.75rem 0 0">Claiming holds it for you. Not
+        collecting twice in a row pauses your account.</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="footer" data-footer></footer>
+<script src="assets/app.js"></script>
+<script>
+const user = requireRole('user');
+const params = new URLSearchParams(location.search);
+const listing = findListing(params.get('id')) || listings()[0];
+
+if (listing) {
+  const free = listing.type === 'free';
+  const tag = document.getElementById('tag');
+  tag.textContent = free ? 'Free' : listing.discount + '% off';
+  tag.className = 'badge ' + (free ? 'badge-free' : 'badge-discount');
+
+  document.getElementById('title').textContent = listing.item;
+  document.getElementById('outlet').textContent = listing.outlet;
+  document.getElementById('price').innerHTML = free ? 'Free' : '<s>' + money(listing.was) + '</s>' + money(listing.now);
+  document.getElementById('left').textContent = listing.portions - listing.claimed;
+  document.getElementById('closes').textContent = listing.closes;
+  document.getElementById('dist').textContent = listing.distance + ' km';
+  document.getElementById('area').textContent = listing.area;
+
+  document.getElementById('claimBtn').addEventListener('click', () => {
+    Store.set('activeClaim', {
+      id: listing.id,
+      item: listing.item,
+      outlet: listing.outlet,
+      area: listing.area,
+      price: free ? 'Free' : money(listing.now),
+      code: makeCode(),
+      expires: Date.now() + 45 * 60 * 1000
+    });
+    window.location.href = 'user-claim.html';
+  });
+}
+</script>
+</body>
+</html>

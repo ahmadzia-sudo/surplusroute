@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Create an account — SurplusRoute</title>
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="masthead" data-header></header>
+
+<main id="main" class="shell page">
+  <div class="auth-shell">
+    <h1>Create an account</h1>
+    <p class="muted">Two kinds of account. Pick the one that describes you.</p>
+
+    <form class="card" id="signupForm" novalidate>
+      <div class="field">
+        <label>I am</label>
+        <div class="choice-set">
+          <label class="choice">
+            <input type="radio" name="role" value="outlet" checked>
+            <strong>A food outlet</strong>
+            <span>Bakery, cafe, restaurant or canteen</span>
+          </label>
+          <label class="choice">
+            <input type="radio" name="role" value="user">
+            <strong>A resident</strong>
+            <span>Looking for affordable food nearby</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="name">Full name</label>
+        <input type="text" id="name" required>
+      </div>
+
+      <div class="field" id="orgField">
+        <label for="org">Business name</label>
+        <input type="text" id="org" placeholder="Al Barsha Bakery House">
+      </div>
+
+      <div class="field">
+        <label for="email2">Email</label>
+        <input type="email" id="email2" autocomplete="username" required>
+      </div>
+
+      <div class="field">
+        <label for="pass2">Password</label>
+        <p class="hint">At least eight characters.</p>
+        <input type="password" id="pass2" autocomplete="new-password" required>
+      </div>
+
+      <div class="checkline">
+        <input type="checkbox" id="terms" required>
+        <label for="terms">I agree to the terms of use and the privacy notice.</label>
+      </div>
+
+      <button class="btn btn-primary btn-block" type="submit">Create account</button>
+    </form>
+
+    <div class="notice" style="margin-top:1.5rem">
+      <p class="tight"><b>Resident accounts need approval.</b> After signing up you confirm your
+      eligibility once. An administrator reviews it, and outlets never see any of it.</p>
+    </div>
+
+    <p class="meta" style="margin-top:1.5rem">Already registered? <a href="login.html">Sign in</a>.</p>
+  </div>
+</main>
+
+<footer class="footer" data-footer></footer>
+<script src="assets/app.js"></script>
+<script>
+const orgField = document.getElementById('orgField');
+
+document.querySelectorAll('input[name="role"]').forEach(r => {
+  r.addEventListener('change', () => {
+    orgField.hidden = r.value === 'user' && r.checked;
+  });
+});
+
+document.getElementById('signupForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const role = document.querySelector('input[name="role"]:checked').value;
+  const name = document.getElementById('name').value.trim() || (role === 'outlet' ? 'Sunil Varghese' : 'New resident');
+  const org = document.getElementById('org').value.trim() || 'Al Barsha Bakery House';
+  const email = document.getElementById('email2').value.trim() || (role === 'outlet' ? 'sunil@bakery.ae' : 'new@worker.ae');
+
+  Store.set('session', { email, role, name, org: role === 'outlet' ? org : 'Dubai' });
+  window.location.href = role === 'outlet' ? 'outlet-dashboard.html' : 'user-verify.html';
+});
+</script>
+</body>
+</html>

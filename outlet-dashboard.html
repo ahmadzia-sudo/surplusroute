@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your listings — SurplusRoute</title>
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="masthead" data-header></header>
+
+<main id="main" class="shell page">
+
+  <div class="row row-between" style="margin-bottom:1.5rem">
+    <div>
+      <h1 class="tight" id="outletName">Al Barsha Bakery House</h1>
+      <p class="meta">Tonight's surplus, and what has been claimed so far.</p>
+    </div>
+    <a class="btn btn-primary btn-lg push" href="outlet-new-listing.html">List surplus</a>
+  </div>
+
+  <div class="stat-row" style="margin-bottom:2rem">
+    <div class="stat"><b id="statLive">2</b><span>Listings live now</span></div>
+    <div class="stat"><b id="statClaimed">6</b><span>Portions claimed tonight</span></div>
+    <div class="stat"><b>38 kg</b><span>Kept out of waste this month</span></div>
+    <div class="stat"><b>AED 410</b><span>Recovered on discounted items</span></div>
+  </div>
+
+  <section class="panel" style="margin-bottom:2rem">
+    <div class="panel-head">
+      <h2 style="font-size:1.3125rem">Live tonight</h2>
+      <span class="badge badge-live push">Collection window open</span>
+    </div>
+    <div class="panel-body">
+      <div class="listing-list" id="mine"></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head"><h2 style="font-size:1.3125rem">Earlier this week</h2></div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Item</th><th>Portions</th><th>Type</th><th>Collected</th><th>Recovered</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Croissants and danishes</td><td>7</td><td><span class="badge badge-discount">65% off</span></td><td>7 of 7</td><td>AED 84</td></tr>
+          <tr><td>Day-old loaves</td><td>12</td><td><span class="badge badge-free">Donated</span></td><td>11 of 12</td><td>—</td></tr>
+          <tr><td>Sandwich selection</td><td>5</td><td><span class="badge badge-discount">70% off</span></td><td>4 of 5</td><td>AED 28</td></tr>
+          <tr><td>Cheese rolls</td><td>6</td><td><span class="badge badge-free">Donated</span></td><td>6 of 6</td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer" data-footer></footer>
+<script src="assets/app.js"></script>
+<script>
+const user = requireRole('outlet');
+if (user) {
+  document.getElementById('outletName').textContent = user.org || 'Your outlet';
+
+  const mine = listings().filter(l => l.mine);
+  document.getElementById('statLive').textContent = mine.length;
+  document.getElementById('statClaimed').textContent = mine.reduce((n, l) => n + l.claimed, 0);
+
+  document.getElementById('mine').innerHTML = mine.map(l => `
+    <a class="listing" href="outlet-listing.html?id=${l.id}">
+      <div class="listing-top">
+        <div>
+          <h3 class="listing-title">${l.item}</h3>
+          <p class="listing-outlet">Listed ${l.id}</p>
+        </div>
+        <span class="badge ${l.type === 'free' ? 'badge-free' : 'badge-discount'} push">
+          ${l.type === 'free' ? 'Donated' : l.discount + '% off'}
+        </span>
+      </div>
+      <div class="row row-between">
+        <span class="price">${l.type === 'free' ? 'Free' : money(l.now)}</span>
+        <span class="badge badge-quiet">${l.claimed} of ${l.portions} claimed</span>
+      </div>
+      <div class="listing-facts">
+        <span>Collect by <b>${l.closes}</b></span>
+        <span>View codes</span>
+      </div>
+    </a>`).join('');
+}
+</script>
+</body>
+</html>

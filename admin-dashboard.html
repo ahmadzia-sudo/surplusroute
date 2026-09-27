@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Overview — SurplusRoute admin</title>
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="masthead" data-header></header>
+
+<main id="main" class="shell page">
+
+  <h1 class="tight">Overview</h1>
+  <p class="meta" style="margin-bottom:1.5rem">Platform activity across Dubai and Sharjah.</p>
+
+  <div class="stat-row" style="margin-bottom:2rem">
+    <div class="stat"><b id="pending">3</b><span>Registrations awaiting review</span></div>
+    <div class="stat"><b>214</b><span>Verified residents</span></div>
+    <div class="stat"><b>31</b><span>Outlets on the platform</span></div>
+    <div class="stat"><b>1,840</b><span>Portions collected this month</span></div>
+  </div>
+
+  <div class="grid grid-2" style="margin-bottom:2rem">
+    <div class="card">
+      <p class="eyebrow">Needs attention</p>
+      <h3>Three registrations waiting</h3>
+      <p class="muted">Most are reviewed within a day. Longer than that and people stop coming back.</p>
+      <a class="btn btn-primary" href="admin-review.html">Review registrations</a>
+    </div>
+    <div class="card">
+      <p class="eyebrow">Data held</p>
+      <h3>Nothing kept after a decision</h3>
+      <p class="muted tight">Identity documents are deleted as soon as a registration is approved or
+      rejected. What remains is the decision, the emirate and the date. Outlets can see none of it.</p>
+    </div>
+  </div>
+
+  <section class="panel">
+    <div class="panel-head"><h2 style="font-size:1.3125rem">Recent activity</h2></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>When</th><th>Outlet</th><th>Listed</th><th>Claimed</th><th>Collected</th></tr></thead>
+        <tbody>
+          <tr><td class="meta">Tonight</td><td>Al Barsha Bakery House</td><td>10 portions</td><td>6</td><td>4</td></tr>
+          <tr><td class="meta">Tonight</td><td>Karama Kitchen</td><td>8 portions</td><td>3</td><td>3</td></tr>
+          <tr><td class="meta">Tonight</td><td>Green Fork Cafe</td><td>5 portions</td><td>1</td><td>1</td></tr>
+          <tr><td class="meta">Yesterday</td><td>Corniche Grill</td><td>12 portions</td><td>12</td><td>11</td></tr>
+          <tr><td class="meta">Yesterday</td><td>Daily Bread Co.</td><td>15 portions</td><td>14</td><td>14</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer" data-footer></footer>
+<script src="assets/app.js"></script>
+<script>
+const user = requireRole('admin');
+const decided = Store.get('decisions', {});
+const waiting = SEED_VERIFICATIONS.filter(v => v.status === 'pending' && !decided[v.id]).length;
+document.getElementById('pending').textContent = waiting;
+</script>
+</body>
+</html>

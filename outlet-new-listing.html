@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>List surplus — SurplusRoute</title>
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="masthead" data-header></header>
+
+<main id="main" class="shell page">
+  <div style="max-width:620px">
+    <p class="eyebrow"><a href="outlet-dashboard.html">Back to listings</a></p>
+    <h1>List surplus</h1>
+    <p class="lede">Three questions. It goes live the moment you save it.</p>
+
+    <form class="card" id="listingForm" novalidate>
+
+      <div class="field">
+        <label for="item">What is it?</label>
+        <input type="text" id="item" placeholder="Mixed pastry box" required>
+      </div>
+
+      <div class="field">
+        <label for="portions">How many portions?</label>
+        <input type="number" id="portions" min="1" max="99" value="6" required>
+      </div>
+
+      <div class="field">
+        <label>Free or discounted?</label>
+        <div class="choice-set">
+          <label class="choice">
+            <input type="radio" name="ltype" value="discount" checked>
+            <strong>Discounted</strong>
+            <span>You recover some value</span>
+          </label>
+          <label class="choice">
+            <input type="radio" name="ltype" value="free">
+            <strong>Donated</strong>
+            <span>Free to collect</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="field" id="priceBlock">
+        <label for="discount">Discount: <span class="serif-num" id="discountOut">70%</span></label>
+        <input type="range" id="discount" min="30" max="90" step="5" value="70">
+        <div class="row row-between" style="margin-top:.75rem">
+          <span class="meta">Normal price</span>
+          <div style="width:120px"><input type="number" id="was" value="40" min="1"></div>
+        </div>
+        <div class="row row-between" style="margin-top:.5rem">
+          <span class="meta">Collector pays</span>
+          <span class="price" id="nowOut">AED 12</span>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <div class="field">
+        <label for="closes">Collect by</label>
+        <p class="hint">Claims expire on their own when this time passes.</p>
+        <input type="time" id="closes" value="22:30" required>
+      </div>
+
+      <button class="btn btn-primary btn-block btn-lg" type="submit">Publish listing</button>
+      <p class="meta" style="text-align:center;margin:1rem 0 0">Nobody enters the kitchen. Collection
+      happens at your counter.</p>
+    </form>
+  </div>
+</main>
+
+<footer class="footer" data-footer></footer>
+<script src="assets/app.js"></script>
+<script>
+const user = requireRole('outlet');
+
+const discount = document.getElementById('discount');
+const was = document.getElementById('was');
+const priceBlock = document.getElementById('priceBlock');
+
+function refreshPrice() {
+  const pct = Number(discount.value);
+  const base = Number(was.value) || 0;
+  document.getElementById('discountOut').textContent = pct + '%';
+  document.getElementById('nowOut').textContent = money(Math.max(0, Math.round(base * (1 - pct / 100))));
+}
+
+discount.addEventListener('input', refreshPrice);
+was.addEventListener('input', refreshPrice);
+refreshPrice();
+
+document.querySelectorAll('input[name="ltype"]').forEach(r => {
+  r.addEventListener('change', () => { priceBlock.hidden = r.value === 'free' && r.checked; });
+});
+
+document.getElementById('listingForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const type = document.querySelector('input[name="ltype"]:checked').value;
+  const pct = Number(discount.value);
+  const base = Number(was.value) || 0;
+
+  const entry = {
+    id: 'L-' + Math.floor(2500 + Math.random() * 400),
+    outlet: user.org || 'Your outlet',
+    area: 'Al Barsha 1, Dubai',
+    item: document.getElementById('item').value.trim() || 'Mixed pastry box',
+    portions: Number(document.getElementById('portions').value) || 1,
+    claimed: 0,
+    type: type,
+    discount: type === 'free' ? 100 : pct,
+    was: base,
+    now: type === 'free' ? 0 : Math.max(0, Math.round(base * (1 - pct / 100))),
+    closes: document.getElementById('closes').value || '22:30',
+    distance: 0.7,
+    mine: true
+  };
+
+  const saved = Store.get('newListings', []);
+  saved.unshift(entry);
+  Store.set('newListings', saved);
+  window.location.href = 'outlet-listing.html?id=' + entry.id + '&new=1';
+});
+</script>
+</body>
+</html>

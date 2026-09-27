@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Available nearby — SurplusRoute</title>
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="masthead" data-header></header>
+
+<main id="main" class="shell page">
+
+  <h1 class="tight">Available nearby</h1>
+  <p class="meta" style="margin-bottom:1.5rem">Closest first. Check what is left before you travel.</p>
+
+  <div class="row" style="margin-bottom:1.5rem" role="group" aria-label="Filter listings">
+    <button class="btn btn-primary btn-sm" type="button" data-filter="all" aria-pressed="true">Everything</button>
+    <button class="btn btn-secondary btn-sm" type="button" data-filter="free" aria-pressed="false">Free only</button>
+    <button class="btn btn-secondary btn-sm" type="button" data-filter="discount" aria-pressed="false">Discounted</button>
+    <span class="meta push" id="count"></span>
+  </div>
+
+  <div class="listing-list" id="list"></div>
+
+  <div class="empty" id="none" hidden>
+    <h3>Nothing matches that filter</h3>
+    <p class="muted tight">Try Everything, or check again after 9pm when most kitchens close.</p>
+  </div>
+
+</main>
+
+<footer class="footer" data-footer></footer>
+<script src="assets/app.js"></script>
+<script>
+const user = requireRole('user');
+let filter = 'all';
+
+function render() {
+  const all = listings()
+    .filter(l => l.claimed < l.portions)
+    .sort((a, b) => a.distance - b.distance);
+
+  const shown = filter === 'all' ? all : all.filter(l => l.type === filter);
+
+  document.getElementById('count').textContent = shown.length + ' available';
+  document.getElementById('none').hidden = shown.length > 0;
+
+  document.getElementById('list').innerHTML = shown.map(l => {
+    const left = l.portions - l.claimed;
+    return `
+    <a class="listing" href="user-listing.html?id=${l.id}">
+      <div class="listing-top">
+        <div>
+          <h3 class="listing-title">${l.item}</h3>
+          <p class="listing-outlet">${l.outlet} · ${l.distance} km</p>
+        </div>
+        <span class="badge ${l.type === 'free' ? 'badge-free' : 'badge-discount'} push">
+          ${l.type === 'free' ? 'Free' : l.discount + '% off'}
+        </span>
+      </div>
+      <div class="row row-between">
+        <span class="price">${l.type === 'free' ? 'Free' : '<s>' + money(l.was) + '</s>' + money(l.now)}</span>
+        <span class="badge badge-quiet">${left} left</span>
+      </div>
+      <div class="listing-facts">
+        <span>Collect by <b>${l.closes}</b></span>
+        <span>${l.area}</span>
+      </div>
+    </a>`;
+  }).join('');
+}
+
+document.querySelectorAll('[data-filter]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    filter = btn.dataset.filter;
+    document.querySelectorAll('[data-filter]').forEach(b => {
+      const on = b === btn;
+      b.className = 'btn btn-sm ' + (on ? 'btn-primary' : 'btn-secondary');
+      b.setAttribute('aria-pressed', String(on));
+    });
+    render();
+  });
+});
+
+render();
+</script>
+</body>
+</html>

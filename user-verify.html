@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Confirm your eligibility — SurplusRoute</title>
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="masthead" data-header></header>
+
+<main id="main" class="shell page">
+  <div style="max-width:620px">
+    <h1>Confirm your eligibility</h1>
+    <p class="lede">Once only. After this you never explain your situation to anyone again.</p>
+
+    <div class="notice" style="margin-bottom:1.5rem">
+      <p><b>What happens to what you send.</b></p>
+      <p class="tight">An administrator checks it, records yes or no, and the file is deleted. Bakeries and
+      restaurants never see your name, your ID or anything about your income. At the counter they see a
+      four-character code and nothing else.</p>
+    </div>
+
+    <form class="card" id="verifyForm" novalidate>
+
+      <div class="field">
+        <label for="vname">Full name, as it appears on your Emirates ID</label>
+        <input type="text" id="vname" required>
+      </div>
+
+      <div class="field">
+        <label for="emirate">Where do you live?</label>
+        <select id="emirate">
+          <option>Dubai</option>
+          <option selected>Sharjah</option>
+          <option>Ajman</option>
+          <option>Abu Dhabi</option>
+          <option>Ras Al Khaimah</option>
+          <option>Fujairah</option>
+          <option>Umm Al Quwain</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="idupload">Emirates ID</label>
+        <p class="hint">A photo of the front is enough.</p>
+        <div class="dropzone">
+          <p class="meta tight" style="margin-bottom:.75rem">No file chosen</p>
+          <input type="file" id="idupload" accept="image/*">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Household income</label>
+        <p class="hint">Choose a band. You do not need to upload a salary certificate or payslip.</p>
+        <div class="stack">
+          <div class="checkline">
+            <input type="radio" name="band" id="b1" checked>
+            <label for="b1">Under AED 3,000 a month</label>
+          </div>
+          <div class="checkline">
+            <input type="radio" name="band" id="b2">
+            <label for="b2">AED 3,000 to 5,000 a month</label>
+          </div>
+          <div class="checkline">
+            <input type="radio" name="band" id="b3">
+            <label for="b3">Above AED 5,000 a month</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="checkline">
+        <input type="checkbox" id="declare" required>
+        <label for="declare">I confirm this is accurate and I understand my details are deleted after review.</label>
+      </div>
+
+      <button class="btn btn-primary btn-block btn-lg" type="submit">Send for review</button>
+    </form>
+
+    <div class="card" id="sent" hidden style="margin-top:1.5rem;text-align:center">
+      <h2>Sent for review</h2>
+      <p class="muted">Most registrations are reviewed within a day. You can look at what is available
+      near you in the meantime, and claim once you are approved.</p>
+      <a class="btn btn-primary" href="user-browse.html">See what is available</a>
+    </div>
+  </div>
+</main>
+
+<footer class="footer" data-footer></footer>
+<script src="assets/app.js"></script>
+<script>
+document.getElementById('verifyForm').addEventListener('submit', e => {
+  e.preventDefault();
+  Store.set('verified', true);
+  document.getElementById('verifyForm').hidden = true;
+  document.getElementById('sent').hidden = false;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+</script>
+</body>
+</html>
